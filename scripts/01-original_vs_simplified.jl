@@ -1,6 +1,8 @@
 #=
 Обучение упрощенного адаптивного осциллятора Хопфа (HAFO).
 Модель обучается на частоту внешнего сигнала
+Результат: время обучения оригинальной системы имеет выраженную зависимость от параметра μ.
+Время обучения упрощенной системы более устойчиво к изменениям этого параметра.
 =#
 
 include("../src/oscillator_models.jl")
@@ -20,20 +22,20 @@ PLOT_PX_PER_UNIT_PNG = 2
 ########################################################################
 
 # Постоянные параметры системы
-γ, μ, ε, N = 1.0, 20.0, 10.0, 2 # 1.0, 1.0, 0.9, 2
+γ, μ, ε, N = 1.0, 1.0, 0.5, 2 # 1.0, 1.0, 0.9, 2
 Ω_teach = [20.0, 160.0]
 A_teach = [1.0, 2.0]
 Φ_teach = [0.0, 0.0]
 system_param = SA[γ, μ, ε, N, Ω_teach..., A_teach..., Φ_teach...]
 
 # Начальные условия системы
-x₀, y₀, ω₀ = 1.0, 0.0, 40.0
+x₀, y₀ = 1.0, 0.0
 ω₀_1, ω₀_2 = 60.0, 85.0
 U₀_1 = SA[x₀, y₀, ω₀_1]
 U₀_2 = SA[x₀, y₀, ω₀_2]
 
 # Время интегрирования
-t₀, t₁ = 0.0, 150.0
+t₀, t₁ = 0.0, 1500.0
 t_SPAN = [t₀, t₁]
 
 # Проверка параметров и начальных условий
@@ -49,6 +51,7 @@ println("system_param = $system_param")
 @time solution_o_1 = original_HAFO_integrate(U₀_1, t_SPAN, system_param)
 @time solution_o_2 = original_HAFO_integrate(U₀_2, t_SPAN, system_param)
 
+# Интегрирование упрощенной системы
 @time solution_s_1 = simplified_HAFO_integrate(U₀_1, t_SPAN, system_param)
 @time solution_s_2 = simplified_HAFO_integrate(U₀_2, t_SPAN, system_param)
 
@@ -58,7 +61,7 @@ println("system_param = $system_param")
 
 fig = Figure(resolution=PLOT_RES)
 ax_ω = Axis(fig[1,1], 
-    title="ω(t)",
+    title="ω(t), μ=$(μ)",
     xlabel="t",
     ylabel="ω")
 
